@@ -4588,10 +4588,39 @@ components:
           type: boolean
           description: Whether the business entity is officially registered with regulatory authorities
           example: true
+        id_document:
+          $ref: '#/components/schemas/BusinessIdDocumentProof'
         grievance_officer_details:
           $ref: '#/components/schemas/GrievanceOfficerDetails'
         customer_care_details:
           $ref: '#/components/schemas/CustomerCareDetails'
+    BusinessIdDocumentProof:
+      type: object
+      description: Government-issued ID document used as proof for an unregistered business
+      required:
+      - document_type
+      - document_number
+      - document_url
+      properties:
+        document_type:
+          type: string
+          description: Type of government-issued identification document
+          enum:
+          - NATIONAL_ID
+          - PASSPORT
+          - DRIVERS_LICENSE
+          example: NATIONAL_ID
+        document_number:
+          type: string
+          description: Identifier shown on the government-issued document
+          minLength: 1
+          maxLength: 128
+          example: '123456789'
+        document_url:
+          type: string
+          format: uri
+          description: URL of the uploaded ID document
+          example: https://example.com/documents/national-id.pdf
     GrievanceOfficerDetails:
       type: object
       description: Contact information for the designated grievance officer
@@ -4667,6 +4696,8 @@ components:
           type: boolean
           description: Whether the business entity is officially registered with regulatory authorities. Can only be used with "OTHER" or "PARTNERSHIP" entity types.
           example: true
+        id_document:
+          $ref: '#/components/schemas/BusinessIdDocumentProof'
         grievance_officer_details:
           $ref: '#/components/schemas/GrievanceOfficerUpdateDetails'
         customer_care_details:
@@ -18497,7 +18528,7 @@ paths:
 
           default fields will be returned. Available fields: messaging_product, entity_name,
 
-          entity_type, entity_type_custom, is_registered, grievance_officer_details, customer_care_details
+          entity_type, entity_type_custom, is_registered, id_document, grievance_officer_details, customer_care_details
 
           '
         schema:
@@ -18545,6 +18576,10 @@ paths:
                       entity_type: null
                       entity_type_custom: null
                       is_registered: false
+                      id_document:
+                        document_type: NATIONAL_ID
+                        document_number: '123456789'
+                        document_url: https://example.com/documents/national-id.pdf
                       grievance_officer_details: null
                       customer_care_details: null
         '400':
@@ -18680,6 +18715,8 @@ paths:
 
         - `is_registered` can only be used with "Other" or "Partnership" entity types
 
+        - `id_document` is required for unregistered businesses and must not be supplied for registered businesses
+
         - `grievance_officer_details` is required with complete contact information
 
         - `customer_care_details` is required with contact information
@@ -18755,6 +18792,24 @@ paths:
                   customer_care_details:
                     email: support@innovativetech.com
                     mobile_number: '+918901234567'
+              unregistered_entity_update:
+                summary: Unregistered business with ID document proof
+                value:
+                  messaging_product: whatsapp
+                  entity_name: Neighborhood Grocer
+                  entity_type: SOLE_PROPRIETORSHIP
+                  is_registered: false
+                  id_document:
+                    document_type: NATIONAL_ID
+                    document_number: '123456789'
+                    document_url: https://example.com/documents/national-id.pdf
+                  grievance_officer_details:
+                    name: Alex Rivera
+                    email: alex@neighborhoodgrocer.com
+                    mobile_number: '+15551234567'
+                  customer_care_details:
+                    email: support@neighborhoodgrocer.com
+                    mobile_number: '+15551234567'
       responses:
         '200':
           description: Successfully updated business compliance information
